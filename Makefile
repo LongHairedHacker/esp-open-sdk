@@ -120,7 +120,7 @@ clean-sysroot:
 esptool: toolchain $(TOOLCHAIN)/esptool/bin/esptool.py
 
 $(TOOLCHAIN)/esptool/bin/esptool.py:  esptool/setup.py esptool/esptool.py
-	virtualenv2 $(TOOLCHAIN)/esptool/
+	virtualenv $(TOOLCHAIN)/esptool/
 	bash -c 'source $(TOOLCHAIN)/esptool/bin/activate; cd esptool; python setup.py install'
 
 toolchain: $(TOOLCHAIN)/bin/xtensa-lx106-elf-gcc
