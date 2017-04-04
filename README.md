@@ -51,7 +51,7 @@ Cadence Design Systems, Inc, and/or their contractors.
 
 2. ESP8266 IoT SDK from Espressif Systems. This component is only
    partially open source, (some libraries are provided as binary blobs).
-    * http://bbs.espressif.com/viewforum.php?f=5
+    * http://bbs.espressif.com/viewforum.php?f=46
 
 OpenSource components of the SDK are based on:
 * lwIP, http://savannah.nongnu.org/projects/lwip/
@@ -68,15 +68,18 @@ Requirements and Dependencies
 
 To build the standalone SDK and toolchain, you need a GNU/POSIX system
 (Linux, BSD, MacOSX, Windows with Cygwin) with the standard GNU development
-tools installed: gcc, binutils, flex, bison, etc.
+tools installed: bash, gcc, binutils, flex, bison, etc.
+
+Please make sure that the machine you use to build the toolchain has at least
+1G free RAM+swap (or more, which will speed up the build).
 
 ## Debian/Ubuntu
 
 Ubuntu 14.04:
 ```
-$ sudo apt-get install make unrar autoconf automake libtool gcc g++ gperf \
-    flex bison texinfo gawk ncurses-dev libexpat-dev python python-serial sed \
-    git
+$ sudo apt-get install make unrar-free autoconf automake libtool gcc g++ gperf \
+    flex bison texinfo gawk ncurses-dev libexpat-dev python-dev python python-serial \
+    sed git unzip bash help2man wget bzip2
 ```
 
 Later Debian/Ubuntu versions may require:
@@ -87,7 +90,7 @@ $ sudo apt-get install libtool-bin
 ## MacOS:
 ```bash
 $ brew tap homebrew/dupes
-$ brew install binutils coreutils automake wget gawk libtool gperf gnu-sed --with-default-names grep
+$ brew install binutils coreutils automake wget gawk libtool help2man gperf gnu-sed --with-default-names grep
 $ export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
 ```
 
@@ -127,22 +130,37 @@ The project can be built in two modes:
        to a newer vendor IoT SDK releases.
     2. Abide by licensing terms of the vendor IoT SDK.
 
-To build the separated SDK:
-
-```
-$ make STANDALONE=n
-```
-
-To build the standalone SDK:
+To build the self-contained, standalone toolchain+SDK:
 
 ```
 $ make STANDALONE=y
 ```
 
-This will download all necessary components and compile them. Once done,
-the toolchain (with the Xtensa HAL library) will be available in the
-`xtensa-lx106-elf/` directory. Add its `bin/` subdirectory to your
-`$PATH` to execute `xtensa-lx106-elf-gcc` and other tools.
+This is the default choice which most people are looking for, so just the
+following is enough:
+
+```
+$ make
+```
+
+To build the bare Xtensa toolchain and leave ESP8266 SDK separate:
+
+```
+$ make STANDALONE=n
+```
+
+This will download all necessary components and compile them.
+
+Using the toolchain
+===================
+
+Once you complete build process as described above, the toolchain (with
+the Xtensa HAL library) will be available in the `xtensa-lx106-elf/`
+subdirectory. Add `xtensa-lx106-elf/bin/` subdirectory to your `PATH`
+environment variable to execute `xtensa-lx106-elf-gcc` and other tools.
+At the end of build process, the exact command to set PATH correctly
+for your case will be output. You may want to save it, as you'll need
+the PATH set correctly each time you compile for Xtensa/ESP.
 
 ESP8266 SDK will be installed in `sdk/`. If you chose the non-standalone
 SDK, run the compiler with the corresponding include and lib dir flags:
@@ -153,6 +171,11 @@ $ xtensa-lx106-elf-gcc -I$(THISDIR)/sdk/include -L$(THISDIR)/sdk/lib
 
 The extra -I and -L flags are not needed when using the standalone SDK.
 
+Subdirectory `examples/` contains some example application(s) which
+can be built with esp-open-sdk. If you are interested in real-world,
+full-fledged, advanced example of a project built using esp-open-sdk,
+check https://github.com/micropython/micropython/tree/master/esp8266 .
+
 Pulling updates
 ===============
 The project is updated from time to time, to get updates and prepare to
@@ -162,7 +185,7 @@ build a new SDK, run:
 $ make clean
 $ git pull
 $ git submodule sync
-$ git submodule update
+$ git submodule update --init
 ```
 
 If you don't issue `make clean` (which causes toolchain and SDK to be
